@@ -23,8 +23,8 @@ from torch.utils.data.distributed import DistributedSampler
 
 from pysot.utils.lr_scheduler import build_lr_scheduler
 from pysot.utils.log_helper import init_log, print_speed, add_file_handler
-from pysot.utils.distributed import dist_init, DistModule, reduce_gradients,\
-        average_reduce, get_rank, get_world_size
+from pysot.utils.distributed import dist_init, DistModule, reduce_gradients, \
+    average_reduce, get_rank, get_world_size
 from pysot.utils.model_load import load_pretrain, restore_from
 from pysot.utils.average_meter import AverageMeter
 from pysot.utils.misc import describe, commit
@@ -32,6 +32,7 @@ from pysot.models.model_builder import ModelBuilder
 from pysot.datasets.dataset import TrkDataset
 from pysot.core.config import cfg
 
+from pysot.models.enhance.triple_attention import TripletAttention
 
 logger = logging.getLogger('global')
 parser = argparse.ArgumentParser(description='siamrpn tracking')
@@ -54,7 +55,7 @@ def seed_torch(seed=0):
     torch.backends.cudnn.deterministic = True
 
 
-def build_data_loader():
+def build_data_loader( ):
     logger.info("build train dataset")
     # train_dataset
     train_dataset = TrkDataset()
@@ -72,11 +73,17 @@ def build_data_loader():
 
 
 def build_opt_lr(model, current_epoch=0):
+    # IS_DONE: 在optimizer中加入了新添加的模块的参数
+    # print(model)
+
     for param in model.backbone.parameters():
         param.requires_grad = False
     for m in model.backbone.modules():
         if isinstance(m, nn.BatchNorm2d):
             m.eval()
+
+    # if cfg.ENHANCE.BACKBONE.triple_attn:
+
     if current_epoch >= cfg.BACKBONE.TRAIN_EPOCH:
         for layer in cfg.BACKBONE.TRAIN_LAYERS:
             for param in getattr(model.backbone, layer).parameters():
@@ -85,25 +92,46 @@ def build_opt_lr(model, current_epoch=0):
                 if isinstance(m, nn.BatchNorm2d):
                     m.train()
 
+    if cfg.ENHANCE.BACKBONE.triple_attn:
+        for layer in cfg.ENHANCE.BACKBONE.enhanced_layers:
+            for param in getattr(model.backbone, layer).parameters():
+                param.requires_grad = True
+            for m in getattr(model.backbone, layer).modules():
+                m.train()
+
+
     trainable_params = []
-    trainable_params += [{'params': filter(lambda x: x.requires_grad,
-                                           model.backbone.parameters()),
-                          'lr': cfg.BACKBONE.LAYERS_LR * cfg.TRAIN.BASE_LR}]
+    trainable_params += [{'params':filter(lambda x:x.requires_grad,
+                                          model.backbone.parameters()),
+                          'lr'    :cfg.BACKBONE.LAYERS_LR * cfg.TRAIN.BASE_LR}]
 
     if cfg.ADJUST.ADJUST:
-        trainable_params += [{'params': model.neck.parameters(),
-                              'lr': cfg.TRAIN.BASE_LR}]
+        trainable_params += [{'params':model.neck.parameters(),
+                              'lr'    :cfg.TRAIN.BASE_LR}]
 
-    trainable_params += [{'params': model.rpn_head.parameters(),
-                          'lr': cfg.TRAIN.BASE_LR}]
+    trainable_params += [{'params':model.rpn_head.parameters(),
+                          'lr'    :cfg.TRAIN.BASE_LR}]
 
     if cfg.MASK.MASK:
-        trainable_params += [{'params': model.mask_head.parameters(),
-                              'lr': cfg.TRAIN.BASE_LR}]
+        trainable_params += [{'params':model.mask_head.parameters(),
+                              'lr'    :cfg.TRAIN.BASE_LR}]
 
     if cfg.REFINE.REFINE:
-        trainable_params += [{'params': model.refine_head.parameters(),
-                              'lr': cfg.TRAIN.LR.BASE_LR}]
+        trainable_params += [{'params':model.refine_head.parameters(),
+                              'lr'    :cfg.TRAIN.BASE_LR}]
+
+
+    #
+    # trainable_params += [{'params':model.backbone.layer_enhancer_3_4.parameters(),
+    #                       'lr'    :cfg.TRAIN.BASE_LR}]
+    # trainable_params += [{'params':model.backbone.layer_enhancer_4_5.parameters(),
+    #                       'lr'    :cfg.TRAIN.BASE_LR}]
+
+    if cfg.ENHANCE.RPN.deform_conv:
+        trainable_params += [{'params':model.deform_conv.parameters(),
+                              'lr'    :cfg.TRAIN.BASE_LR}]
+
+    print(trainable_params)
 
     optimizer = torch.optim.SGD(trainable_params,
                                 momentum=cfg.TRAIN.MOMENTUM,
@@ -135,12 +163,12 @@ def log_grads(model, tb_writer, tb_index):
         else:
             rpn_norm += _norm ** 2
 
-        tb_writer.add_scalar('grad_all/'+k.replace('.', '/'),
+        tb_writer.add_scalar('grad_all/' + k.replace('.', '/'),
                              _norm, tb_index)
-        tb_writer.add_scalar('weight_all/'+k.replace('.', '/'),
+        tb_writer.add_scalar('weight_all/' + k.replace('.', '/'),
                              w_norm, tb_index)
-        tb_writer.add_scalar('w-g/'+k.replace('.', '/'),
-                             w_norm/(1e-20 + _norm), tb_index)
+        tb_writer.add_scalar('w-g/' + k.replace('.', '/'),
+                             w_norm / (1e-20 + _norm), tb_index)
     tot_norm = feature_norm + rpn_norm
     tot_norm = tot_norm ** 0.5
     feature_norm = feature_norm ** 0.5
@@ -158,11 +186,11 @@ def train(train_loader, model, optimizer, lr_scheduler, tb_writer):
     average_meter = AverageMeter()
 
     def is_valid_number(x):
-        return not(math.isnan(x) or math.isinf(x) or x > 1e4)
+        return not (math.isnan(x) or math.isinf(x) or x > 1e4)
 
     world_size = get_world_size()
     num_per_epoch = len(train_loader.dataset) // \
-        cfg.TRAIN.EPOCH // (cfg.TRAIN.BATCH_SIZE * world_size)
+                    cfg.TRAIN.EPOCH // (cfg.TRAIN.BATCH_SIZE * world_size)
     start_epoch = cfg.TRAIN.START_EPOCH
     epoch = start_epoch
 
@@ -178,9 +206,9 @@ def train(train_loader, model, optimizer, lr_scheduler, tb_writer):
 
             if get_rank() == 0:
                 torch.save(
-                    {'epoch': epoch,
-                     'state_dict': model.module.state_dict(),
-                     'optimizer': optimizer.state_dict()},
+                    {'epoch'     :epoch,
+                     'state_dict':model.module.state_dict(),
+                     'optimizer' :optimizer.state_dict()},
                     cfg.TRAIN.SNAPSHOT_DIR + '/checkpoint_e%d.pth' % (epoch))
 
             if epoch == cfg.TRAIN.EPOCH + 1:
@@ -193,14 +221,14 @@ def train(train_loader, model, optimizer, lr_scheduler, tb_writer):
 
             lr_scheduler.step(epoch)
             cur_lr = lr_scheduler.get_cur_lr()
-            logger.info('epoch: {}'.format(epoch+1))
+            logger.info('epoch: {}'.format(epoch + 1))
 
         tb_idx = idx
         if idx % num_per_epoch == 0 and idx != 0:
             for idx, pg in enumerate(optimizer.param_groups):
-                logger.info('epoch {} lr {}'.format(epoch+1, pg['lr']))
+                logger.info('epoch {} lr {}'.format(epoch + 1, pg['lr']))
                 if rank == 0:
-                    tb_writer.add_scalar('lr/group{}'.format(idx+1),
+                    tb_writer.add_scalar('lr/group{}'.format(idx + 1),
                                          pg['lr'], tb_idx)
 
         data_time = average_reduce(time.time() - end)
@@ -235,26 +263,25 @@ def train(train_loader, model, optimizer, lr_scheduler, tb_writer):
             for k, v in batch_info.items():
                 tb_writer.add_scalar(k, v, tb_idx)
 
-            if (idx+1) % cfg.TRAIN.PRINT_FREQ == 0:
+            if (idx + 1) % cfg.TRAIN.PRINT_FREQ == 0:
                 info = "Epoch: [{}][{}/{}] lr: {:.6f}\n".format(
-                            epoch+1, (idx+1) % num_per_epoch,
-                            num_per_epoch, cur_lr)
+                    epoch + 1, (idx + 1) % num_per_epoch,
+                    num_per_epoch, cur_lr)
                 for cc, (k, v) in enumerate(batch_info.items()):
                     if cc % 2 == 0:
                         info += ("\t{:s}\t").format(
-                                getattr(average_meter, k))
+                            getattr(average_meter, k))
                     else:
                         info += ("{:s}\n").format(
-                                getattr(average_meter, k))
+                            getattr(average_meter, k))
                 logger.info(info)
-                print_speed(idx+1+start_epoch*num_per_epoch,
+                print_speed(idx + 1 + start_epoch * num_per_epoch,
                             average_meter.batch_time.avg,
                             cfg.TRAIN.EPOCH * num_per_epoch)
         end = time.time()
 
 
-
-def main():
+def main( ):
     # rank, world_size = dist_init()
     rank = 0
     world_size = 1

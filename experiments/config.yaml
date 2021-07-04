@@ -12,9 +12,11 @@ BACKBONE:
 ENHANCE:
     RPN:
         deform_attn: False
-        deform_conv: True
+        deform_conv: False
     BACKBONE:
-        triple_attn: False
+        enhanced_layers: ['layer_enhancer_3_4', 'layer_enhancer_4_5']
+        triple_attn: True
+
 
 ADJUST:
     ADJUST: true
@@ -29,8 +31,8 @@ RPN:
         anchor_num: 5
         in_channels: [256, 256, 256]
         weighted: True
-        use_ca: True
-        use_sa: True
+        use_ca: False
+        use_sa: False
 
 MASK:
     MASK: false
