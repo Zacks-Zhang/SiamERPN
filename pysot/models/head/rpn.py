@@ -11,9 +11,11 @@ import torch.nn.functional as F
 
 from pysot.core.xcorr import xcorr_fast, xcorr_depthwise
 from pysot.models.init_weight import init_weights
+from pysot.core.config import cfg
 
 from pysot.models.enhance.ecanet import *
 from pysot.models.enhance.cbam import CBAM
+from pysot.models.enhance.triple_attention import TripletAttention
 
 
 class RPN(nn.Module):
@@ -56,8 +58,7 @@ class UPChannelRPN(RPN):
 
 
 class DepthwiseXCorr(nn.Module):
-    def __init__(self, in_channels, hidden, out_channels, kernel_size=3, hidden_kernel_size=5, use_ca=False,
-            use_sa=False, is_cls=False):
+    def __init__(self, in_channels, hidden, out_channels, kernel_size=3, hidden_kernel_size=5, is_cls=False):
         super(DepthwiseXCorr, self).__init__()
         self.conv_kernel = nn.Sequential(
             nn.Conv2d(in_channels, hidden, kernel_size=kernel_size, bias=False),
@@ -75,31 +76,43 @@ class DepthwiseXCorr(nn.Module):
             nn.ReLU(inplace=True),
             nn.Conv2d(hidden, out_channels, kernel_size=1)
         )
-        self.cls_attn_z = ECA(hidden)
-        self.cls_attn_x = ECA(hidden)
+
+        if cfg.ENHANCE.RPN.cls_ch:
+            self.cls_attn_z = ECA(hidden)
+            self.cls_attn_x = ECA(hidden)
 
         # TODO: 采用BAM的空间注意力
-        self.reg_attn_z = CBAM(gate_channels=hidden, reduction_ratio=16, pool_types=['avg', 'max'], use_channel=use_ca,
-                            use_spatial=use_sa)
-        self.reg_attn_x = CBAM(gate_channels=hidden, reduction_ratio=16, pool_types=['avg', 'max'], use_channel=use_ca,
-                            use_spatial=use_sa)
+        if cfg.ENHANCE.RPN.reg_sp:
+            self.reg_attn_z = CBAM(gate_channels=hidden, reduction_ratio=16, pool_types=['avg', 'max'],
+                                   use_channel=True,
+                                   use_spatial=False)
+            self.reg_attn_x = CBAM(gate_channels=hidden, reduction_ratio=16, pool_types=['avg', 'max'],
+                                   use_channel=True,
+                                   use_spatial=False)
 
-        self.use_ca = use_ca
-        self.use_sa = use_sa
+        if cfg.ENHANCE.RPN.self_attn:
+            self.self_attn_z = TripletAttention()
+            self.self_attn_x = TripletAttention()
 
         self.is_cls = is_cls
 
     def forward(self, kernel, search):
         kernel = self.conv_kernel(kernel)
         search = self.conv_search(search)
-        if (self.use_ca and self.is_cls):
+        if cfg.ENHANCE.RPN.cls_ch and self.is_cls:
             # print("Using channel enhance.")
             kernel, search = self.cls_attn_z(kernel), self.cls_attn_x(search)
-        if (self.use_sa and not self.is_cls):
+        elif cfg.ENHANCE.RPN.reg_sp and not self.is_cls:
             # print("using position enhance.")
             kernel, search = self.reg_attn_z(kernel), self.reg_attn_x(search)
 
+        # if cfg.ENHANCE.RPN.self_attn:
+        #     kernel = self.self_attn_z(kernel)
+        #     search = self.self_attn_x(search)
         feature = xcorr_depthwise(search, kernel)
+        if cfg.ENHANCE.RPN.self_attn:
+            feature = self.self_attn_x(feature)
+
         out = self.head(feature)
         return out
 
@@ -107,8 +120,8 @@ class DepthwiseXCorr(nn.Module):
 class DepthwiseRPN(RPN):
     def __init__(self, anchor_num=5, in_channels=256, out_channels=256, use_ca=False, use_sa=False):
         super(DepthwiseRPN, self).__init__()
-        self.cls = DepthwiseXCorr(in_channels, out_channels, 2 * anchor_num, use_ca=use_ca, use_sa=use_sa, is_cls=True)
-        self.loc = DepthwiseXCorr(in_channels, out_channels, 4 * anchor_num, use_ca=use_ca, use_sa=use_sa, is_cls=False)
+        self.cls = DepthwiseXCorr(in_channels, out_channels, 2 * anchor_num, is_cls=True)
+        self.loc = DepthwiseXCorr(in_channels, out_channels, 4 * anchor_num, is_cls=False)
 
     def forward(self, z_f, x_f):
         cls = self.cls(z_f, x_f)
@@ -117,12 +130,12 @@ class DepthwiseRPN(RPN):
 
 
 class MultiRPN(RPN):
-    def __init__(self, anchor_num, in_channels, weighted=False, use_ca=False, use_sa=False):
+    def __init__(self, anchor_num, in_channels, weighted=False):
         super(MultiRPN, self).__init__()
         self.weighted = weighted
         for i in range(len(in_channels)):
             self.add_module('rpn' + str(i + 2),
-                            DepthwiseRPN(anchor_num, in_channels[i], in_channels[i], use_ca=use_ca, use_sa=use_sa))
+                            DepthwiseRPN(anchor_num, in_channels[i], in_channels[i]))
         if self.weighted:
             self.cls_weight = nn.Parameter(torch.ones(len(in_channels)))
             self.loc_weight = nn.Parameter(torch.ones(len(in_channels)))
