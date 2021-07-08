@@ -92,7 +92,7 @@ class DepthwiseXCorr(nn.Module):
 
         if cfg.ENHANCE.RPN.self_attn:
             self.self_attn_z = TripletAttention()
-            self.self_attn_x = TripletAttention()
+            # self.self_attn_x = TripletAttention()
 
         self.is_cls = is_cls
 
