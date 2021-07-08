@@ -154,6 +154,7 @@ class ResNet(nn.Module):
         if cfg.ENHANCE.BACKBONE.triple_attn:
             self.layer_enhancer_3_4 = TripletAttention()
             self.layer_enhancer_4_5 = TripletAttention()
+            self.layer_enhancer_5 = TripletAttention()
 
 
 
@@ -208,6 +209,8 @@ class ResNet(nn.Module):
             p3 = self.layer_enhancer_4_5(p3)
         # conv5
         p4 = self.layer4(p3)
+        if cfg.ENHANCE.BACKBONE.triple_attn:
+            p4 = self.layer_enhancer_5(p4)
         out = [x_, p1, p2, p3, p4]
         out = [out[i] for i in self.used_layers]
         if len(out) == 1:

@@ -17,8 +17,9 @@ ENHANCE:
         reg_sp: False
         self_attn: True
     BACKBONE:
-        enhanced_layers: ['layer_enhancer_3_4', 'layer_enhancer_4_5']
+        enhanced_layers: ['layer_enhancer_3_4', 'layer_enhancer_4_5', 'layer_enhancer_5']
         triple_attn: False
+        cross_attn: False
 
 
 ADJUST:
@@ -67,13 +68,13 @@ TRAIN:
         TYPE: 'log'
         KWARGS:
             start_lr: 0.01
-            end_lr: 0.05
+            end_lr: 0.0025
     LR_WARMUP:
         TYPE: 'step'
         EPOCH: 5
         KWARGS:
-            start_lr: 0.005
-            end_lr: 0.025
+            start_lr: 0.001
+            end_lr: 0.01
             step: 1
 
 DATASET:
