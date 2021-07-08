@@ -67,14 +67,14 @@ TRAIN:
     LR:
         TYPE: 'log'
         KWARGS:
-            start_lr: 0.01
+            start_lr: 0.005
             end_lr: 0.0025
     LR_WARMUP:
         TYPE: 'step'
         EPOCH: 5
         KWARGS:
             start_lr: 0.001
-            end_lr: 0.01
+            end_lr: 0.005
             step: 1
 
 DATASET:
