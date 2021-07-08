@@ -25,7 +25,7 @@ parser.add_argument('--tracker_prefix', '-t', default='',
                     type=str, help='tracker name')
 parser.add_argument('--show_video_level', '-s', dest='show_video_level',
                     action='store_true')
-parser.set_defaults(show_video_level=False)
+parser.set_defaults(show_video_level=True)
 args = parser.parse_args()
 
 
@@ -41,7 +41,7 @@ def main():
 
     root = os.path.realpath(os.path.join(os.path.dirname(__file__),
                             '../testing_dataset'))
-    root = os.path.realpath("E:/")
+    root = os.path.realpath("./testing_dataset/")
     root = os.path.join(root, args.dataset)
     if 'OTB' in args.dataset:
         dataset = OTBDataset(args.dataset, root)

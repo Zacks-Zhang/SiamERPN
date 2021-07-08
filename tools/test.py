@@ -26,9 +26,9 @@ parser.add_argument('--dataset', default='OTB100', type=str,
         help='datasets')
 parser.add_argument('--config', default='./experiments/config.yaml', type=str,
         help='config file')
-parser.add_argument('--snapshot', default='./models/*.pth', type=str,
+parser.add_argument('--snapshot', default='./models/', type=str,
         help='snapshot of models to eval')
-parser.add_argument('--video', default='', type=str,
+parser.add_argument('--video', default='Basketball', type=str,
         help='eval one special video')
 parser.add_argument('--vis', action='store_true',
         help='whether visualzie result')
@@ -42,7 +42,7 @@ def main():
 
     cur_dir = os.path.dirname(os.path.realpath(__file__))
     # dataset_root = os.path.join(cur_dir, '../testing_dataset', args.dataset)
-    dataset_root = 'E:/OTB100/'
+    dataset_root = './testing_dataset/OTB100'
 
     # create model
     model = ModelBuilder()
