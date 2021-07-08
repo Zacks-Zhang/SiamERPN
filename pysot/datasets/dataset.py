@@ -246,14 +246,18 @@ class TrkDataset(Dataset):
         else:
             template, search = dataset.get_positive_pair(index)
 
+
         # get image
         template_image = cv2.imread(template[0])
         search_image = cv2.imread(search[0])
 
         # get bounding box
-        template_box = self._get_bbox(template_image, template[1])
-        search_box = self._get_bbox(search_image, search[1])
-
+        try:
+            template_box = self._get_bbox(template_image, template[1])
+            search_box = self._get_bbox(search_image, search[1])
+        except:
+            print(template[0])
+            print(search[0])
         # augmentation
         template, _ = self.template_aug(template_image,
                                         template_box,

@@ -131,7 +131,7 @@ def build_opt_lr(model, current_epoch=0):
         trainable_params += [{'params':model.deform_conv.parameters(),
                               'lr'    :cfg.TRAIN.BASE_LR}]
 
-    print(trainable_params)
+    # print(trainable_params)
 
     optimizer = torch.optim.SGD(trainable_params,
                                 momentum=cfg.TRAIN.MOMENTUM,
@@ -201,6 +201,7 @@ def train(train_loader, model, optimizer, lr_scheduler, tb_writer):
     logger.info("model\n{}".format(describe(model.module)))
     end = time.time()
     for idx, data in enumerate(train_loader):
+        # print(idx)
         if epoch != idx // num_per_epoch + start_epoch:
             epoch = idx // num_per_epoch + start_epoch
 

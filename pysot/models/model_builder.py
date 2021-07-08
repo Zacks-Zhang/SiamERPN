@@ -73,7 +73,7 @@ class ModelBuilder(nn.Module):
         if cfg.ENHANCE.RPN.deform_conv:
             self.zf[:2], xf[:2] = self.deform_conv(self.zf[:2], xf[:2])
 
-        cls, loc = self.rpn_head(self.f, xf)
+        cls, loc = self.rpn_head(self.zf, xf)
         if cfg.MASK.MASK:
             mask, self.mask_corr_feature = self.mask_head(self.zf, xf)
         return {
