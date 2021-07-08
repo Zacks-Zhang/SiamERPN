@@ -69,13 +69,13 @@ class ModelBuilder(nn.Module):
             xf = self.neck(xf)
 
         # ISDONE: 在neck后加入可变形卷积
-        zf = self.zf
+        # zf = self.zf
         if cfg.ENHANCE.RPN.deform_conv:
-            zf[:2], xf[:2] = self.deform_conv(zf[:2], xf[:2])
+            self.zf[:2], xf[:2] = self.deform_conv(self.zf[:2], xf[:2])
 
-        cls, loc = self.rpn_head(zf, xf)
+        cls, loc = self.rpn_head(self.f, xf)
         if cfg.MASK.MASK:
-            mask, self.mask_corr_feature = self.mask_head(zf, xf)
+            mask, self.mask_corr_feature = self.mask_head(self.zf, xf)
         return {
             'cls' :cls,
             'loc' :loc,

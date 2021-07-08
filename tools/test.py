@@ -28,7 +28,7 @@ parser.add_argument('--config', default='./experiments/config.yaml', type=str,
         help='config file')
 parser.add_argument('--snapshot', default='./models/', type=str,
         help='snapshot of models to eval')
-parser.add_argument('--video', default='Basketball', type=str,
+parser.add_argument('--video', default='', type=str,
         help='eval one special video')
 parser.add_argument('--vis', action='store_true',
         help='whether visualzie result')
