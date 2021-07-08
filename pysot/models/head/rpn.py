@@ -111,7 +111,7 @@ class DepthwiseXCorr(nn.Module):
         #     search = self.self_attn_x(search)
         feature = xcorr_depthwise(search, kernel)
         if cfg.ENHANCE.RPN.self_attn:
-            feature = self.self_attn_x(feature)
+            feature = self.self_attn_z(feature)
 
         out = self.head(feature)
         return out
