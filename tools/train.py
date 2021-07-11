@@ -204,6 +204,7 @@ def train(train_loader, model, optimizer, lr_scheduler, tb_writer):
         # print(idx)
         if epoch != idx // num_per_epoch + start_epoch:
             epoch = idx // num_per_epoch + start_epoch
+            logger.info("Current epoch is: {}".format(epoch))
 
             if get_rank() == 0:
                 torch.save(
