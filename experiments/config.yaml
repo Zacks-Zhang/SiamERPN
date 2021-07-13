@@ -6,7 +6,7 @@ BACKBONE:
         used_layers: [2, 3, 4]
     PRETRAINED: 'pretrained_models/resnet50.model'
     TRAIN_LAYERS: ['layer2', 'layer3', 'layer4']
-    TRAIN_EPOCH: 10
+    TRAIN_EPOCH: 5
     LAYERS_LR: 0.1
 
 ENHANCE:
@@ -68,7 +68,7 @@ TRAIN:
         TYPE: 'log'
         KWARGS:
             start_lr: 0.005
-            end_lr: 0.0025
+            end_lr: 0.0005
     LR_WARMUP:
         TYPE: 'step'
         EPOCH: 5
