@@ -91,7 +91,8 @@ class DepthwiseXCorr(nn.Module):
                                    use_spatial=False)
 
         if cfg.ENHANCE.RPN.self_attn:
-            self.self_attn_z = TripletAttention()
+            self.self_attn_z = CBAM(gate_channels=hidden, reduction_ratio=4, pool_types=['avg', 'max'], use_channel=True,
+                                   use_spatial=True)
             # self.self_attn_x = TripletAttention()
 
         self.is_cls = is_cls
