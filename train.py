@@ -312,7 +312,7 @@ def main( ):
     # load pretrained backbone weights
     if cfg.BACKBONE.PRETRAINED:
         cur_path = os.path.dirname(os.path.realpath(__file__))
-        backbone_path = os.path.join(cur_path, '../', cfg.BACKBONE.PRETRAINED)
+        backbone_path = os.path.join(cur_path, cfg.BACKBONE.PRETRAINED)
         load_pretrain(model.backbone, backbone_path)
 
     # create tensorboard writer
