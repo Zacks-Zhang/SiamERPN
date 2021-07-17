@@ -112,8 +112,6 @@ training_dataset/*
 
 .idea/
 
-pysot/models/enhance/dcn/*
-pysot/models/enhance/deform_attn/dcn/*
 
 snapshot/
 
@@ -125,5 +123,5 @@ models/*
 
 pretrained_models/*
 
-!setup.py
-!src/
+build/
+*egg-info*/
