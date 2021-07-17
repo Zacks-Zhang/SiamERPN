@@ -124,3 +124,6 @@ logs/*
 models/*
 
 pretrained_models/*
+
+!setup.py
+!src/
