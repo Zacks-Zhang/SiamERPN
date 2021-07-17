@@ -12,14 +12,14 @@ BACKBONE:
 ENHANCE:
     RPN:
         deform_attn: False
-        deform_conv: True
+        deform_conv: False
         cls_ch: False
         reg_sp: False
-        self_attn: True
+        self_attn: False
     BACKBONE:
         enhanced_layers: ['layer_enhancer_3_4', 'layer_enhancer_4_5', 'layer_enhancer_5']
         triple_attn: False
-        cross_attn: True
+        cross_attn: False
 
 
 ADJUST:
