@@ -244,8 +244,8 @@ def train(train_loader, model, optimizer, lr_scheduler, tb_writer):
             optimizer.zero_grad()
             for name, param in model.named_parameters():
                 pass
-                if not param.grad:
-                    print(f"detected unused parameter: {name}")
+                #if not param.grad:
+                 #   print(f"detected unused parameter: {name}")
             loss.backward()
             reduce_gradients(model)
 
