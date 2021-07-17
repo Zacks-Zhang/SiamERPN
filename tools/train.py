@@ -242,6 +242,9 @@ def train(train_loader, model, optimizer, lr_scheduler, tb_writer):
 
         if is_valid_number(loss.data.item()):
             optimizer.zero_grad()
+            for name, param in model.named_parameters():
+                if not param.grad:
+                    print(f"detected unused parameter: {name}")
             loss.backward()
             reduce_gradients(model)
 
@@ -284,9 +287,9 @@ def train(train_loader, model, optimizer, lr_scheduler, tb_writer):
 
 
 def main( ):
-    # rank, world_size = dist_init()
-    rank = 0
-    world_size = 1
+    rank, world_size = dist_init()
+    # rank = 0
+    # world_size = 1
     logger.info("init done")
 
     # load cfg

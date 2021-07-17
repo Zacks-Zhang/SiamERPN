@@ -80,12 +80,11 @@ def _dist_init():
         ntasks: world_size (process num)
         proc_id: rank
     '''
-    # rank = int(os.environ['RANK'])
-    rank = 0
+    rank = int(os.environ['RANK'])
     num_gpus = torch.cuda.device_count()
     torch.cuda.set_device(rank % num_gpus)
+    dist.init_process_group(backend='nccl')
     world_size = dist.get_world_size()
-    dist.init_process_group(backend='nccl', rank=rank, world_size=world_size)
     return rank, world_size
 
 
@@ -115,14 +114,12 @@ def dist_init():
 
 
 def get_rank():
-    return 0
     if not inited:
         raise(Exception('dist not inited'))
     return rank
 
 
 def get_world_size():
-    return 1
     if not inited:
         raise(Exception('dist not inited'))
     return world_size
