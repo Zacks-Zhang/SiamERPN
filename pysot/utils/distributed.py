@@ -130,11 +130,14 @@ def reduce_gradients(model, _type='sum'):
     assert _type in types, 'gradients method must be in "{}"'.format(types)
     log_once("gradients method is {}".format(_type))
     if get_world_size() > 1:
-        for name, param in model.named_parameters():
+        # Test for BAD params.
+        # for name, param in model.named_parameters():
+        #     if param.requires_grad:
+        #         if param.grad == None:
+        #             print(f"detected unused parameter: {name}")
+
+        for param in model.parameters():
             if param.requires_grad:
-                if param.grad == None:
-                    print(f"detected unused parameter: {name}")
-                    continue
                 dist.all_reduce(param.grad.data)
                 if _type == 'avg':
                     param.grad.data /= get_world_size()
