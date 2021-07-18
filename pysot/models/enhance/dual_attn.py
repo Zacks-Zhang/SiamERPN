@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 from torch.nn import functional as F
-from pysot.models.enhance.deform_attn.init_weight import kaiming_init
 
 torch_ver = torch.__version__[:3]
 
@@ -186,3 +185,20 @@ class NONLocalBlock2D(_NonLocalBlockND):
                                               inter_channels=inter_channels,
                                               dimension=2, sub_sample=sub_sample,
                                               bn_layer=bn_layer)
+
+
+def kaiming_init(module,
+                 a=0,
+                 mode='fan_out',
+                 nonlinearity='relu',
+                 bias=0,
+                 distribution='normal'):
+    assert distribution in ['uniform', 'normal']
+    if distribution == 'uniform':
+        nn.init.kaiming_uniform_(
+            module.weight, a=a, mode=mode, nonlinearity=nonlinearity)
+    else:
+        nn.init.kaiming_normal_(
+            module.weight, a=a, mode=mode, nonlinearity=nonlinearity)
+    if hasattr(module, 'bias') and module.bias is not None:
+        nn.init.constant_(module.bias, bias)

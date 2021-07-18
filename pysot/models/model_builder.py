@@ -14,7 +14,6 @@ from pysot.models.backbone import get_backbone
 from pysot.models.head import get_rpn_head, get_mask_head, get_refine_head
 from pysot.models.neck import get_neck
 
-from pysot.models.enhance import get_attention
 import numpy as np
 
 from pysot.models.enhance.deform_conv import DeformConv
@@ -27,10 +26,6 @@ class ModelBuilder(nn.Module):
         # build backbone
         self.backbone = get_backbone(cfg.BACKBONE.TYPE,
                                      **cfg.BACKBONE.KWARGS)
-
-        if cfg.ENHANCE.RPN.deform_attn:
-            self.attention = get_attention("DeformAttn", in_channels=[512, 1024, 2048], out_channels=[512, 1024, 2048])
-
 
         # build Adjust layer
         if cfg.ADJUST.ADJUST:
@@ -70,7 +65,7 @@ class ModelBuilder(nn.Module):
 
         # ISDONE: 在neck后加入可变形卷积
         # zf = self.zf
-        if cfg.ENHANCE.RPN.deform_conv:
+        if cfg.ENHANCE.RPN.deform_conv or cfg.ENHANCE.BACKBONE.cross_attn:
             self.zf[:2], xf[:2] = self.deform_conv(self.zf[:2], xf[:2])
 
         cls, loc = self.rpn_head(self.zf, xf)

@@ -83,7 +83,7 @@ def _dist_init():
     rank = int(os.environ['RANK'])
     num_gpus = torch.cuda.device_count()
     torch.cuda.set_device(rank % num_gpus)
-    dist.init_process_group(backend='nccl')
+    dist.init_process_group(backend='gloo')
     world_size = dist.get_world_size()
     return rank, world_size
 

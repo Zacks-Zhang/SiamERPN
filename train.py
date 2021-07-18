@@ -118,9 +118,9 @@ def build_opt_lr(model, current_epoch=0):
         trainable_params += [{'params':model.refine_head.parameters(),
                               'lr'    :cfg.TRAIN.BASE_LR}]
 
-    if cfg.ENHANCE.RPN.deform_conv:
-        trainable_params += [{'params':model.deform_conv.parameters(),
-                              'lr'    :cfg.TRAIN.BASE_LR}]
+    # if cfg.ENHANCE.RPN.deform_conv:
+    #     trainable_params += [{'params':model.deform_conv.parameters(),
+    #                           'lr'    :cfg.TRAIN.BASE_LR}]
 
     # print(trainable_params)
 
