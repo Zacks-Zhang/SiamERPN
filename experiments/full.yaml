@@ -14,11 +14,11 @@ ENHANCE:
         deform_conv: True
         cls_ch: False
         reg_sp: False
-        self_attn: True
+        self_attn: False
     BACKBONE:
         enhanced_layers: ['layer_enhancer_3_4', 'layer_enhancer_4_5', 'layer_enhancer_5']
         triple_attn: False
-        cross_attn: True
+        cross_attn: False
 
 
 ADJUST:
@@ -48,7 +48,7 @@ TRACK:
     TYPE: 'SiamRPNTracker'
     PENALTY_K: 0.04
     WINDOW_INFLUENCE: 0.44
-    LR: 0.33
+    LR: 0.5
     EXEMPLAR_SIZE: 127
     INSTANCE_SIZE: 255
     BASE_SIZE: 8
@@ -57,7 +57,7 @@ TRACK:
 TRAIN:
     EPOCH: 20
     START_EPOCH: 0
-    BATCH_SIZE: 64
+    BATCH_SIZE: 8
     BASE_LR: 0.005
     CLS_WEIGHT: 1.0
     LOC_WEIGHT: 1.2

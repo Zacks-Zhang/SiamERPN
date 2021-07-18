@@ -65,6 +65,7 @@ class ModelBuilder(nn.Module):
 
         # ISDONE: 在neck后加入可变形卷积
         # zf = self.zf
+        print(self.zf[:2].shape)
         if cfg.ENHANCE.RPN.deform_conv or cfg.ENHANCE.BACKBONE.cross_attn:
             self.zf[:2], xf[:2] = self.deform_conv(self.zf[:2], xf[:2])
 
