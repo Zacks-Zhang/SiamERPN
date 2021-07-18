@@ -213,7 +213,7 @@ def train(train_loader, model, optimizer, lr_scheduler, tb_writer):
                      'optimizer' :optimizer.state_dict()},
                     cfg.TRAIN.SNAPSHOT_DIR + '/checkpoint_e%d.pth' % (epoch))
 
-            if epoch == cfg.TRAIN.EPOCH + 1:
+            if epoch == cfg.TRAIN.EPOCH:
                 return
 
             if cfg.BACKBONE.TRAIN_EPOCH == epoch:
