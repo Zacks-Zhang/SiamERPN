@@ -82,8 +82,6 @@ def build_opt_lr(model, current_epoch=0):
         if isinstance(m, nn.BatchNorm2d):
             m.eval()
 
-    # if cfg.ENHANCE.BACKBONE.triple_attn:
-
     if current_epoch >= cfg.BACKBONE.TRAIN_EPOCH:
         for layer in cfg.BACKBONE.TRAIN_LAYERS:
             for param in getattr(model.backbone, layer).parameters():
@@ -119,13 +117,6 @@ def build_opt_lr(model, current_epoch=0):
     if cfg.REFINE.REFINE:
         trainable_params += [{'params':model.refine_head.parameters(),
                               'lr'    :cfg.TRAIN.BASE_LR}]
-
-
-    #
-    # trainable_params += [{'params':model.backbone.layer_enhancer_3_4.parameters(),
-    #                       'lr'    :cfg.TRAIN.BASE_LR}]
-    # trainable_params += [{'params':model.backbone.layer_enhancer_4_5.parameters(),
-    #                       'lr'    :cfg.TRAIN.BASE_LR}]
 
     if cfg.ENHANCE.RPN.deform_conv:
         trainable_params += [{'params':model.deform_conv.parameters(),
@@ -242,10 +233,6 @@ def train(train_loader, model, optimizer, lr_scheduler, tb_writer):
 
         if is_valid_number(loss.data.item()):
             optimizer.zero_grad()
-            for name, param in model.named_parameters():
-                pass
-                #if not param.grad:
-                 #   print(f"detected unused parameter: {name}")
             loss.backward()
             reduce_gradients(model)
 

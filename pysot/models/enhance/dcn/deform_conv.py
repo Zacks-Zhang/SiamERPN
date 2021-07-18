@@ -243,8 +243,7 @@ class DeformConvPack(DeformConv):
 
         self.conv_offset = nn.Conv2d(
             self.in_channels,
-            self.deformable_groups * 2 * self.kernel_size[0] *
-            self.kernel_size[1],
+            self.deformable_groups * 2 * self.kernel_size[0] * self.kernel_size[1],
             kernel_size=self.kernel_size,
             stride=_pair(self.stride),
             padding=_pair(self.padding),
