@@ -155,7 +155,7 @@ class TrkDataset(Dataset):
         start = 0
         self.num = 0
         for name in cfg.DATASET.NAMES:
-            print(name)
+            # print(name)
             subdata_cfg = getattr(cfg.DATASET, name)
             sub_dataset = SubDataset(
                     name,
