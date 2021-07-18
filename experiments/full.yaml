@@ -6,20 +6,20 @@ BACKBONE:
         used_layers: [2, 3, 4]
     PRETRAINED: 'pretrained_models/resnet50.model'
     TRAIN_LAYERS: ['layer2', 'layer3', 'layer4']
-    TRAIN_EPOCH: 5
+    TRAIN_EPOCH: 10
     LAYERS_LR: 0.1
 
 ENHANCE:
     RPN:
         deform_attn: False
-        deform_conv: False
+        deform_conv: True
         cls_ch: False
         reg_sp: False
-        self_attn: False
+        self_attn: True
     BACKBONE:
         enhanced_layers: ['layer_enhancer_3_4', 'layer_enhancer_4_5', 'layer_enhancer_5']
         triple_attn: False
-        cross_attn: False
+        cross_attn: True
 
 
 ADJUST:
