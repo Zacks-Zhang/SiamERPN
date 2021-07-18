@@ -152,7 +152,7 @@ class DeformConv(nn.Module):
         self.cam_cals = nn.ModuleList()
         self.cam_uses = nn.ModuleList()
         self.deform_convs = nn.ModuleList()
-        for i in range(2):
+        for i in range(3):
             if cfg.ENHANCE.RPN.deform_conv:
                 self.deform_convs.append(
                     DeformConv2d(inc=self.in_channels[i], outc=self.out_channels[i], kernel_size=3,

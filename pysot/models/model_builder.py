@@ -66,7 +66,7 @@ class ModelBuilder(nn.Module):
         # ISDONE: 在neck后加入可变形卷积
         # zf = self.zf
         if cfg.ENHANCE.RPN.deform_conv or cfg.ENHANCE.BACKBONE.cross_attn:
-            self.zf[:2], xf[:2] = self.deform_conv(self.zf[:2], xf[:2])
+            self.zf, xf = self.deform_conv(self.zf, xf)
 
         cls, loc = self.rpn_head(self.zf, xf)
         if cfg.MASK.MASK:
@@ -115,10 +115,10 @@ class ModelBuilder(nn.Module):
             # SiamAttn的可变形注意力
             zf, xf = self.attention(zf, xf)
 
-        print(self.zf[:2].shape)
+        # print(len(zf))
         # ISDONE: 在neck后加入可变形卷积
         if cfg.ENHANCE.RPN.deform_conv:
-            zf[:2], xf[:2] = self.deform_conv(zf[:2], xf[:2])
+            zf, xf = self.deform_conv(zf, xf)
         # ISDONE
         #   cls加入了ecanet
         #   loc加入了cbam的空间注意力
