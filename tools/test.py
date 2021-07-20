@@ -24,7 +24,7 @@ from toolkit.utils.region import vot_overlap, vot_float2str
 parser = argparse.ArgumentParser(description='siamrpn tracking')
 parser.add_argument('--dataset', default='OTB100', type=str,
         help='datasets')
-parser.add_argument('--config', default='./experiments/config.yaml', type=str,
+parser.add_argument('--config', default='./experiments/full.yaml', type=str,
         help='config file')
 parser.add_argument('--snapshot', default='./models/', type=str,
         help='snapshot of models to eval')
