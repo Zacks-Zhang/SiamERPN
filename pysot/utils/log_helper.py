@@ -88,7 +88,7 @@ def add_file_handler(name, log_file, level=logging.INFO):
 init_log('global')
 
 
-def print_speed(i, i_time, n):
+def print_speed(i, i_time, n, used_time):
     """print_speed(index, index_time, total_iteration)"""
     logger = logging.getLogger('global')
     average_time = i_time
@@ -99,10 +99,16 @@ def print_speed(i, i_time, n):
     remaining_min = math.floor(remaining_time / 60 -
                                remaining_day * 1440 -
                                remaining_hour * 60)
-    logger.info('Progress: %d / %d [%d%%], Speed: %.3f s/iter, ETA %d:%02d:%02d (D:H:M)\n' %
+    
+    
+    spent_day = math.floor(used_time / 86400)
+    spent_hour = math.floor(used_time / 3600 - spent_day * 24)
+    spent_min = math.floor(used_time / 60 - spent_day * 1440 - spent_hour * 60)
+    logger.info('Progress: %d / %d [%d%%], Speed: %.3f s/iter, ETA %d:%02d:%02d , Spent %d:%02d:%02d\n' %
                 (i, n, i / n * 100,
                  average_time,
-                 remaining_day, remaining_hour, remaining_min))
+                 remaining_day, remaining_hour, remaining_min,
+                 spent_day, spent_hour, spent_min))
 
 
 def find_caller():

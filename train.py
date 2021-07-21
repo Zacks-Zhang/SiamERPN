@@ -176,6 +176,9 @@ def train(train_loader, model, optimizer, lr_scheduler, tb_writer):
 
     average_meter = AverageMeter()
 
+    if rank == 0:
+        begin = time.clock()
+
     def is_valid_number(x):
         return not (math.isnan(x) or math.isinf(x) or x > 1e4)
 
@@ -268,9 +271,10 @@ def train(train_loader, model, optimizer, lr_scheduler, tb_writer):
                         info += ("{:s}\n").format(
                             getattr(average_meter, k))
                 logger.info(info)
+                end = time.clock()
                 print_speed(idx + 1 + start_epoch * num_per_epoch,
                             average_meter.batch_time.avg,
-                            cfg.TRAIN.EPOCH * num_per_epoch)
+                            cfg.TRAIN.EPOCH * num_per_epoch, end-begin)
         end = time.time()
 
 
