@@ -80,7 +80,8 @@ DATASET:
     NAMES:
         - 'COCO'
         - 'VID'
-
+        - 'YOUTUBEBB'
+    
     TEMPLATE:
         SHIFT: 4
         SCALE: 0.05
