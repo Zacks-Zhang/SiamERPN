@@ -24,4 +24,5 @@ class ECA(nn.Module):
         y = self.conv(y.squeeze(-1).transpose(-1, -2)).transpose(-1, -2).unsqueeze(-1)
         # Multi-scale information fusion
         y = self.sigmoid(y)
-        return x * y.expand_as(x)
+        # return x * y.expand_as(x)
+        return y
