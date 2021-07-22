@@ -32,7 +32,7 @@ class ModelBuilder(nn.Module):
             self.neck = get_neck(cfg.ADJUST.TYPE,
                                  **cfg.ADJUST.KWARGS)
 
-        if cfg.ENHANCE.RPN.deform_conv:
+        if cfg.ENHANCE.RPN.deform_conv or cfg.ENHANCE.BACKBONE.cross_attn:
             self.deform_conv = DeformConv(in_channels=[256, 256, 256], out_channels=[256, 256, 256])
 
         # build rpn head
