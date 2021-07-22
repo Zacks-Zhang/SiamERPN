@@ -187,6 +187,7 @@ class TrkDataset(Dataset):
                 cfg.DATASET.SEARCH.COLOR
             )
         videos_per_epoch = cfg.DATASET.VIDEOS_PER_EPOCH
+        print(self.num)
         self.num = videos_per_epoch if videos_per_epoch > 0 else self.num
         self.num *= cfg.TRAIN.EPOCH
         self.pick = self.shuffle()
