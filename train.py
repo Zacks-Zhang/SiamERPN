@@ -183,6 +183,7 @@ def train(train_loader, model, optimizer, lr_scheduler, tb_writer):
         return not (math.isnan(x) or math.isinf(x) or x > 1e4)
 
     world_size = get_world_size()
+    print(len(train_loader.dataset))
     num_per_epoch = len(train_loader.dataset) // \
                     cfg.TRAIN.EPOCH // (cfg.TRAIN.BATCH_SIZE * world_size)
     start_epoch = cfg.TRAIN.START_EPOCH
