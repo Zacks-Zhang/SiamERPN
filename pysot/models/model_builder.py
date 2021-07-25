@@ -5,6 +5,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -66,7 +67,8 @@ class ModelBuilder(nn.Module):
         # ISDONE: 在neck后加入可变形卷积
         # zf = self.zf
         if cfg.ENHANCE.RPN.deform_conv or cfg.ENHANCE.BACKBONE.cross_attn:
-            self.zf, xf = self.deform_conv(self.zf, xf)
+            with torch.no_grad():
+                self.zf, xf = self.deform_conv(self.zf, xf)
 
         cls, loc = self.rpn_head(self.zf, xf)
         if cfg.MASK.MASK:
