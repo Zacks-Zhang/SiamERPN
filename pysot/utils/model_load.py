@@ -51,6 +51,14 @@ def load_pretrain(model, pretrained_path):
     device = torch.cuda.current_device()
     pretrained_dict = torch.load(pretrained_path,
         map_location=lambda storage, loc: storage.cuda(device))
+
+    # print("pretraind dict : {}"%pretrained_dict)
+
+    if cfg.ENHANCE.RPN.deform_conv or cfg.ENHANCE.BACKBONE.cross_attn:
+        new_state_dict = model.state_dict()
+        combined_dict = {k:v for k, v in pretrained_dict.items() if k in new_state_dict}
+        pretrained_dict = combined_dict
+
     if "state_dict" in pretrained_dict.keys():
         pretrained_dict = remove_prefix(pretrained_dict['state_dict'],
                                         'module.')
@@ -67,11 +75,6 @@ def load_pretrain(model, pretrained_path):
             new_dict[k] = v
         pretrained_dict = new_dict
         check_keys(model, pretrained_dict)
-
-    if cfg.ENHANCE.BACKBONE.triple_attn:
-        new_state_dict = model.state_dict()
-        combined_dict = {k:v for k, v in pretrained_dict.items() if k in new_state_dict}
-        pretrained_dict = combined_dict
 
     model.load_state_dict(pretrained_dict, strict=False)
     return model
