@@ -45,7 +45,7 @@ def remove_prefix(state_dict, prefix):
     return {f(key): value for key, value in state_dict.items()}
 
 
-def load_pretrain(model, pretrained_path):
+def load_pretrain(model, pretrained_path, test=False):
     # ISDONE: 在增强过的backbone模型中读取预训练模型
     logger.info('load pretrained model from {}'.format(pretrained_path))
     device = torch.cuda.current_device()
@@ -54,7 +54,7 @@ def load_pretrain(model, pretrained_path):
 
     # print("pretraind dict : {}"%pretrained_dict)
 
-    if cfg.ENHANCE.RPN.deform_conv or cfg.ENHANCE.BACKBONE.cross_attn:
+    if (cfg.ENHANCE.RPN.deform_conv or cfg.ENHANCE.BACKBONE.cross_attn) and not test:
         new_state_dict = model.state_dict()
         combined_dict = {k:v for k, v in pretrained_dict.items() if k in new_state_dict}
         pretrained_dict = combined_dict

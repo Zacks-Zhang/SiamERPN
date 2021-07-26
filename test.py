@@ -48,7 +48,7 @@ def main():
     model = ModelBuilder()
 
     # load model
-    model = load_pretrain(model, args.snapshot).cuda().eval()
+    model = load_pretrain(model, args.snapshot, test=True).cuda().eval()
 
     # build tracker
     tracker = build_tracker(model)
