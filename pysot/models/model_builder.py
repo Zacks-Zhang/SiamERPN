@@ -67,8 +67,8 @@ class ModelBuilder(nn.Module):
         # ISDONE: 在neck后加入可变形卷积
         # zf = self.zf
         if cfg.ENHANCE.RPN.deform_conv or cfg.ENHANCE.BACKBONE.cross_attn:
-            with torch.no_grad():
-                self.zf, xf = self.deform_conv(self.zf, xf)
+            # with torch.no_grad():
+            self.zf, xf = self.deform_conv(self.zf, xf)
 
         cls, loc = self.rpn_head(self.zf, xf)
         if cfg.MASK.MASK:
