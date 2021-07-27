@@ -91,13 +91,19 @@ class DepthwiseXCorr(nn.Module):
                                    use_spatial=False)
 
         if cfg.ENHANCE.RPN.self_attn:
-            self.self_attn_z = CBAM(gate_channels=hidden, reduction_ratio=4, pool_types=['avg', 'max'], use_channel=True,
+            self.self_attn_z = CBAM(gate_channels=in_channels, reduction_ratio=4, pool_types=['avg', 'max'], use_channel=True,
+                                   use_spatial=True)
+            self.self_attn_x = CBAM(gate_channels=in_channels, reduction_ratio=4, pool_types=['avg', 'max'], use_channel=True,
                                    use_spatial=True)
             # self.self_attn_x = TripletAttention()
 
         self.is_cls = is_cls
 
     def forward(self, kernel, search):
+        if cfg.ENHANCE.RPN.self_attn:
+            kernel = self.self_attn_z(kernel)
+            search = self.self_attn_x(search)
+
         kernel = self.conv_kernel(kernel)
         search = self.conv_search(search)
         if cfg.ENHANCE.RPN.cls_ch and self.is_cls:
@@ -111,8 +117,8 @@ class DepthwiseXCorr(nn.Module):
         #     kernel = self.self_attn_z(kernel)
         #     search = self.self_attn_x(search)
         feature = xcorr_depthwise(search, kernel)
-        if cfg.ENHANCE.RPN.self_attn:
-            feature = self.self_attn_z(feature)
+        # if cfg.ENHANCE.RPN.self_attn:
+        #     feature = self.self_attn_z(feature)
 
         out = self.head(feature)
         return out

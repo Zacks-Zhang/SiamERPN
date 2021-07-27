@@ -98,3 +98,4 @@ DATASET:
 
     NEG: 0.2
     GRAY: 0.0
+    VIDEOS_PER_EPOCH: 400000
