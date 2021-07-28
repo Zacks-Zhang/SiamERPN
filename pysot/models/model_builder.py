@@ -45,8 +45,8 @@ class ModelBuilder(nn.Module):
             self.mask_head = get_mask_head(cfg.MASK.TYPE,
                                            **cfg.MASK.KWARGS)
 
-            if cfg.REFINE.REFINE:
-                self.refine_head = get_refine_head(cfg.REFINE.TYPE)
+        if cfg.REFINE.REFINE:
+            self.refine_head = get_refine_head(cfg.REFINE.TYPE)
 
     def template(self, z):
         zf = self.backbone(z)
@@ -64,10 +64,7 @@ class ModelBuilder(nn.Module):
         if cfg.ADJUST.ADJUST:
             xf = self.neck(xf)
 
-        # ISDONE: 在neck后加入可变形卷积
-        # zf = self.zf
         if cfg.ENHANCE.RPN.deform_conv or cfg.ENHANCE.BACKBONE.cross_attn:
-            # with torch.no_grad():
             self.zf, xf = self.deform_conv(self.zf, xf)
 
         cls, loc = self.rpn_head(self.zf, xf)
@@ -111,21 +108,11 @@ class ModelBuilder(nn.Module):
             zf = self.neck(zf)
             xf = self.neck(xf)
 
-        # TODO: 加入交叉注意力
 
-        if cfg.ENHANCE.RPN.deform_attn:
-            # SiamAttn的可变形注意力
-            zf, xf = self.attention(zf, xf)
-
-        # print(len(zf))
-        # ISDONE: 在neck后加入可变形卷积
-        if cfg.ENHANCE.RPN.deform_conv:
+        if cfg.ENHANCE.RPN.deform_conv or cfg.ENHANCE.BACKBONE.cross_attn:
             zf, xf = self.deform_conv(zf, xf)
-        # ISDONE
-        #   cls加入了ecanet
-        #   loc加入了cbam的空间注意力
-        # TODO
-        #   将空间注意力更换为bam
+
+        # 加入了CBAM作为自注意力
         cls, loc = self.rpn_head(zf, xf)
 
         # get loss

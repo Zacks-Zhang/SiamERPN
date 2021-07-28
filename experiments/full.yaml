@@ -11,7 +11,7 @@ BACKBONE:
 
 ENHANCE:
     RPN:
-        deform_conv: True
+        deform_conv: False
         cls_ch: False
         reg_sp: False
         self_attn: True

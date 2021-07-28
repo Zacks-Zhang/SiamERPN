@@ -77,25 +77,25 @@ class DepthwiseXCorr(nn.Module):
             nn.Conv2d(hidden, out_channels, kernel_size=1)
         )
 
-        if cfg.ENHANCE.RPN.cls_ch:
-            self.cls_attn_z = ECA(hidden)
-            self.cls_attn_x = ECA(hidden)
-
-        # TODO: 采用BAM的空间注意力
-        if cfg.ENHANCE.RPN.reg_sp:
-            self.reg_attn_z = CBAM(gate_channels=hidden, reduction_ratio=16, pool_types=['avg', 'max'],
-                                   use_channel=True,
-                                   use_spatial=False)
-            self.reg_attn_x = CBAM(gate_channels=hidden, reduction_ratio=16, pool_types=['avg', 'max'],
-                                   use_channel=True,
-                                   use_spatial=False)
+        # if cfg.ENHANCE.RPN.cls_ch:
+        #     self.cls_attn_z = ECA(hidden)
+        #     self.cls_attn_x = ECA(hidden)
+        #
+        # # TODO: 采用BAM的空间注意力
+        # if cfg.ENHANCE.RPN.reg_sp:
+        #     self.reg_attn_z = CBAM(gate_channels=hidden, reduction_ratio=16, pool_types=['avg', 'max'],
+        #                            use_channel=True,
+        #                            use_spatial=False)
+        #     self.reg_attn_x = CBAM(gate_channels=hidden, reduction_ratio=16, pool_types=['avg', 'max'],
+        #                            use_channel=True,
+        #                            use_spatial=False)
 
         if cfg.ENHANCE.RPN.self_attn:
             self.self_attn_z = CBAM(gate_channels=in_channels, reduction_ratio=4, pool_types=['avg', 'max'], use_channel=True,
                                    use_spatial=True)
             self.self_attn_x = CBAM(gate_channels=in_channels, reduction_ratio=4, pool_types=['avg', 'max'], use_channel=True,
                                    use_spatial=True)
-            # self.self_attn_x = TripletAttention()
+
 
         self.is_cls = is_cls
 
@@ -106,19 +106,14 @@ class DepthwiseXCorr(nn.Module):
 
         kernel = self.conv_kernel(kernel)
         search = self.conv_search(search)
-        if cfg.ENHANCE.RPN.cls_ch and self.is_cls:
-            # print("Using channel enhance.")
-            kernel, search = self.cls_attn_z(kernel), self.cls_attn_x(search)
-        elif cfg.ENHANCE.RPN.reg_sp and not self.is_cls:
-            # print("using position enhance.")
-            kernel, search = self.reg_attn_z(kernel), self.reg_attn_x(search)
+        # if cfg.ENHANCE.RPN.cls_ch and self.is_cls:
+        #     # print("Using channel enhance.")
+        #     kernel, search = self.cls_attn_z(kernel), self.cls_attn_x(search)
+        # elif cfg.ENHANCE.RPN.reg_sp and not self.is_cls:
+        #     # print("using position enhance.")
+        #     kernel, search = self.reg_attn_z(kernel), self.reg_attn_x(search)
 
-        # if cfg.ENHANCE.RPN.self_attn:
-        #     kernel = self.self_attn_z(kernel)
-        #     search = self.self_attn_x(search)
         feature = xcorr_depthwise(search, kernel)
-        # if cfg.ENHANCE.RPN.self_attn:
-        #     feature = self.self_attn_z(feature)
 
         out = self.head(feature)
         return out
