@@ -18,7 +18,7 @@ ENHANCE:
     BACKBONE:
         enhanced_layers: ['layer_enhancer_3_4', 'layer_enhancer_4_5', 'layer_enhancer_5']
         triple_attn: False
-        cross_attn: False
+        cross_attn: True
 
 
 ADJUST:

@@ -65,7 +65,8 @@ class ModelBuilder(nn.Module):
             xf = self.neck(xf)
 
         if cfg.ENHANCE.RPN.deform_conv or cfg.ENHANCE.BACKBONE.cross_attn:
-            self.zf, xf = self.deform_conv(self.zf, xf)
+            with torch.no_grad():
+                self.zf, xf = self.deform_conv(self.zf, xf)
 
         cls, loc = self.rpn_head(self.zf, xf)
         if cfg.MASK.MASK:
