@@ -81,7 +81,6 @@ class DepthwiseXCorr(nn.Module):
         #     self.cls_attn_z = ECA(hidden)
         #     self.cls_attn_x = ECA(hidden)
         #
-        # # TODO: 采用BAM的空间注意力
         # if cfg.ENHANCE.RPN.reg_sp:
         #     self.reg_attn_z = CBAM(gate_channels=hidden, reduction_ratio=16, pool_types=['avg', 'max'],
         #                            use_channel=True,
@@ -107,10 +106,8 @@ class DepthwiseXCorr(nn.Module):
         kernel = self.conv_kernel(kernel)
         search = self.conv_search(search)
         # if cfg.ENHANCE.RPN.cls_ch and self.is_cls:
-        #     # print("Using channel enhance.")
         #     kernel, search = self.cls_attn_z(kernel), self.cls_attn_x(search)
-        # elif cfg.ENHANCE.RPN.reg_sp and not self.is_cls:
-        #     # print("using position enhance.")
+        # if cfg.ENHANCE.RPN.reg_sp and not self.is_cls:
         #     kernel, search = self.reg_attn_z(kernel), self.reg_attn_x(search)
 
         feature = xcorr_depthwise(search, kernel)
@@ -135,9 +132,11 @@ class MultiRPN(RPN):
     def __init__(self, anchor_num, in_channels, weighted=False):
         super(MultiRPN, self).__init__()
         self.weighted = weighted
+
         for i in range(len(in_channels)):
             self.add_module('rpn' + str(i + 2),
                             DepthwiseRPN(anchor_num, in_channels[i], in_channels[i]))
+
         if self.weighted:
             self.cls_weight = nn.Parameter(torch.ones(len(in_channels)))
             self.loc_weight = nn.Parameter(torch.ones(len(in_channels)))
@@ -160,8 +159,12 @@ class MultiRPN(RPN):
 
         def weighted_avg(lst, weight):
             s = 0
-            for i in range(len(weight)):
-                s += lst[i] * weight[i]
+            if cfg.ENHANCE.FEATURE_FUSE:
+                for i in range(2):
+                    s += lst[i] * weight[i]
+            else:
+                for i in range(len(weight)):
+                    s += lst[i] * weight[i]
             return s
 
         if self.weighted:

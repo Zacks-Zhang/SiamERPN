@@ -15,10 +15,6 @@ from pysot.models.backbone import get_backbone
 from pysot.models.head import get_rpn_head, get_mask_head, get_refine_head
 from pysot.models.neck import get_neck
 
-import numpy as np
-
-from pysot.models.enhance.deform_conv import DeformConv
-
 
 class ModelBuilder(nn.Module):
     def __init__(self):
@@ -27,24 +23,17 @@ class ModelBuilder(nn.Module):
         # build backbone
         self.backbone = get_backbone(cfg.BACKBONE.TYPE,
                                      **cfg.BACKBONE.KWARGS)
-
         # build Adjust layer
         if cfg.ADJUST.ADJUST:
             self.neck = get_neck(cfg.ADJUST.TYPE,
                                  **cfg.ADJUST.KWARGS)
-
-        if cfg.ENHANCE.RPN.deform_conv or cfg.ENHANCE.BACKBONE.cross_attn:
-            self.deform_conv = DeformConv(in_channels=[256, 256, 256], out_channels=[256, 256, 256])
-
         # build rpn head
         self.rpn_head = get_rpn_head(cfg.RPN.TYPE,
                                      **cfg.RPN.KWARGS)
-
         # build mask head
         if cfg.MASK.MASK:
             self.mask_head = get_mask_head(cfg.MASK.TYPE,
                                            **cfg.MASK.KWARGS)
-
         if cfg.REFINE.REFINE:
             self.refine_head = get_refine_head(cfg.REFINE.TYPE)
 
@@ -64,9 +53,6 @@ class ModelBuilder(nn.Module):
         if cfg.ADJUST.ADJUST:
             xf = self.neck(xf)
 
-        if cfg.ENHANCE.RPN.deform_conv or cfg.ENHANCE.BACKBONE.cross_attn:
-            # with torch.no_grad():
-            self.zf, xf = self.deform_conv(self.zf, xf)
 
         cls, loc = self.rpn_head(self.zf, xf)
         if cfg.MASK.MASK:
@@ -109,9 +95,9 @@ class ModelBuilder(nn.Module):
             zf = self.neck(zf)
             xf = self.neck(xf)
 
-
-        if cfg.ENHANCE.RPN.deform_conv or cfg.ENHANCE.BACKBONE.cross_attn:
-            zf, xf = self.deform_conv(zf, xf)
+        if cfg.ENHANCE.FEATURE_FUSE:
+            zf = self.feature_fuse(zf)
+            xf = self.feature_fuse(xf)
 
         # 加入了CBAM作为自注意力
         cls, loc = self.rpn_head(zf, xf)
@@ -134,3 +120,16 @@ class ModelBuilder(nn.Module):
             outputs['total_loss'] += cfg.TRAIN.MASK_WEIGHT * mask_loss
             outputs['mask_loss'] = mask_loss
         return outputs
+
+    def upsample_add(self, x, y):
+        _, _, H, W = y.size()
+        return F.upsample(x, size=(H, W), mode='bilinear') + y
+    def downsample_add(self, x, y):
+        _, _, H, W = y.size()
+        return F.adaptive_avg_pool2d(x, output_size=(H, W)) + y
+
+    def feature_fuse(self, x):
+        out = []
+        out.append(self.upsample_add(x[2], x[1]))
+        out.append(self.downsample_add(x[0], x[1]))
+        return out

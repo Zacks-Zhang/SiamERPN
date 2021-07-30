@@ -112,7 +112,6 @@ class Bottleneck(nn.Module):
 
 
 class ResNet(nn.Module):
-    0# ISDONE 在3,4,5层中加入自注意力triple_attention
     def __init__(self, block, layers, used_layers):
         self.inplanes = 64
         super(ResNet, self).__init__()
@@ -151,10 +150,10 @@ class ResNet(nn.Module):
                 m.weight.data.fill_(1)
                 m.bias.data.zero_()
 
-        if cfg.ENHANCE.BACKBONE.triple_attn:
-            self.layer_enhancer_3_4 = TripletAttention()
-            self.layer_enhancer_4_5 = TripletAttention()
-            self.layer_enhancer_5 = TripletAttention()
+        # if cfg.ENHANCE.BACKBONE.triple_attn:
+        #     self.layer_enhancer_3_4 = TripletAttention()
+        #     self.layer_enhancer_4_5 = TripletAttention()
+        #     self.layer_enhancer_5 = TripletAttention()
 
 
 
@@ -201,16 +200,16 @@ class ResNet(nn.Module):
         p1 = self.layer1(x)
         # conv3
         p2 = self.layer2(p1)
-        if cfg.ENHANCE.BACKBONE.triple_attn:
-            p2 = self.layer_enhancer_3_4(p2)
+        # if cfg.ENHANCE.BACKBONE.triple_attn:
+        #     p2 = self.layer_enhancer_3_4(p2)
         # conv4
         p3 = self.layer3(p2)
-        if cfg.ENHANCE.BACKBONE.triple_attn:
-            p3 = self.layer_enhancer_4_5(p3)
+        # if cfg.ENHANCE.BACKBONE.triple_attn:
+        #     p3 = self.layer_enhancer_4_5(p3)
         # conv5
         p4 = self.layer4(p3)
-        if cfg.ENHANCE.BACKBONE.triple_attn:
-            p4 = self.layer_enhancer_5(p4)
+        # if cfg.ENHANCE.BACKBONE.triple_attn:
+        #     p4 = self.layer_enhancer_5(p4)
         out = [x_, p1, p2, p3, p4]
         out = [out[i] for i in self.used_layers]
         if len(out) == 1:
