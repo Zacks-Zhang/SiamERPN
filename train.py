@@ -118,7 +118,9 @@ def build_opt_lr(model, current_epoch=0):
         trainable_params += [{'params':model.refine_head.parameters(),
                               'lr'    :cfg.TRAIN.BASE_LR}]
 
-    # print(trainable_params)
+    if cfg.ENHANCE.FEATURE_FUSE:
+        trainable_params += [{'params':model.feature_fuse.parameters(),
+                              'lr'    :cfg.TRAIN.BASE_LR}]
 
     optimizer = torch.optim.SGD(trainable_params,
                                 momentum=cfg.TRAIN.MOMENTUM,

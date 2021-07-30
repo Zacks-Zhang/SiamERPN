@@ -15,6 +15,7 @@ from pysot.models.backbone import get_backbone
 from pysot.models.head import get_rpn_head, get_mask_head, get_refine_head
 from pysot.models.neck import get_neck
 
+from pysot.models.enhance.FeatureFusion import FeatureFusion
 
 class ModelBuilder(nn.Module):
     def __init__(self):
@@ -37,6 +38,9 @@ class ModelBuilder(nn.Module):
         if cfg.REFINE.REFINE:
             self.refine_head = get_refine_head(cfg.REFINE.TYPE)
 
+        if cfg.ENHANCE.FEATURE_FUSE:
+            self.feature_fuse = FeatureFusion()
+
     def template(self, z):
         zf = self.backbone(z)
         if cfg.MASK.MASK:
@@ -53,6 +57,9 @@ class ModelBuilder(nn.Module):
         if cfg.ADJUST.ADJUST:
             xf = self.neck(xf)
 
+        if cfg.ENHANCE.FEATURE_FUSE:
+            self.zf = self.feature_fuse(self.zf)
+            xf = self.feature_fuse(xf)
 
         cls, loc = self.rpn_head(self.zf, xf)
         if cfg.MASK.MASK:
@@ -120,16 +127,3 @@ class ModelBuilder(nn.Module):
             outputs['total_loss'] += cfg.TRAIN.MASK_WEIGHT * mask_loss
             outputs['mask_loss'] = mask_loss
         return outputs
-
-    def upsample_add(self, x, y):
-        _, _, H, W = y.size()
-        return F.upsample(x, size=(H, W), mode='bilinear') + y
-    def downsample_add(self, x, y):
-        _, _, H, W = y.size()
-        return F.adaptive_avg_pool2d(x, output_size=(H, W)) + y
-
-    def feature_fuse(self, x):
-        out = []
-        out.append(self.upsample_add(x[2], x[1]))
-        out.append(self.downsample_add(x[0], x[1]))
-        return out

@@ -59,6 +59,7 @@ def load_pretrain(model, pretrained_path, test=False):
 
     if not test:
         new_state_dict = model.state_dict()
+        # print(new_state_dict.keys())
         combined_dict = {k:v for k, v in pretrained_dict.items() if k in new_state_dict}
         pretrained_dict = combined_dict
 
@@ -80,6 +81,7 @@ def load_pretrain(model, pretrained_path, test=False):
         check_keys(model, pretrained_dict)
 
     # check_keys(model, pretrained_dict)
+    # print(pretrained_dict.keys())
 
     model.load_state_dict(pretrained_dict, strict=False)
     return model
