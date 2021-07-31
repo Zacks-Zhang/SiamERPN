@@ -125,3 +125,5 @@ pretrained_models/*
 
 build/
 *egg-info*/
+
+full_self_attn/
