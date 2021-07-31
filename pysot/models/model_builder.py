@@ -47,6 +47,8 @@ class ModelBuilder(nn.Module):
             zf = zf[-1]
         if cfg.ADJUST.ADJUST:
             zf = self.neck(zf)
+        if cfg.ENHANCE.FEATURE_FUSE:
+            zf = self.feature_fuse(zf)
         self.zf = zf
 
     def track(self, x):
@@ -58,7 +60,6 @@ class ModelBuilder(nn.Module):
             xf = self.neck(xf)
 
         if cfg.ENHANCE.FEATURE_FUSE:
-            self.zf = self.feature_fuse(self.zf)
             xf = self.feature_fuse(xf)
 
         cls, loc = self.rpn_head(self.zf, xf)
