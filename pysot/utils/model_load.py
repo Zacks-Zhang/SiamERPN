@@ -65,7 +65,7 @@ def load_pretrain(model, pretrained_path, test=False):
             for k, v in pretrained_dict.items():
                 if k in new_state_dict:
                     if ("rpn_head.cls_weight" == k) or ("rpn_head.loc_weight" == k):
-                        print("fuck")
+                        # print("fuck")
                         continue
                     combined_dict[k] = v
         else:
