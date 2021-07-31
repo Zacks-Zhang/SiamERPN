@@ -200,11 +200,14 @@ def train(train_loader, model, optimizer, lr_scheduler, tb_writer):
             logger.info("Current epoch is: {}".format(epoch))
 
             if get_rank() == 0:
+                pattern = args.cfg.split('/')[-1]
+                if not os.path.exists(cfg.TRAIN.SNAPSHOT_DIR+'/'+pattern):
+                    os.mkdir(cfg.TRAIN.SNAPSHOT_DIR+'/'+pattern)
                 torch.save(
                     {'epoch'     :epoch,
                      'state_dict':model.module.state_dict(),
                      'optimizer' :optimizer.state_dict()},
-                    cfg.TRAIN.SNAPSHOT_DIR + '/checkpoint_e%d.pth' % (epoch))
+                    cfg.TRAIN.SNAPSHOT_DIR + '/%s/checkpoint_e%d.pth' % (pattern, epoch))
 
             if epoch == cfg.TRAIN.EPOCH:
                 return
