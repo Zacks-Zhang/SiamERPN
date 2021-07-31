@@ -41,8 +41,8 @@ def remove_prefix(state_dict, prefix):
     ''' Old style model is stored with all names of parameters
     share common prefix 'module.' '''
     logger.info('remove prefix \'{}\''.format(prefix))
-    f = lambda x: x.split(prefix, 1)[-1] if x.startswith(prefix) else x
-    return {f(key): value for key, value in state_dict.items()}
+    f = lambda x:x.split(prefix, 1)[-1] if x.startswith(prefix) else x
+    return {f(key):value for key, value in state_dict.items()}
 
 
 def load_pretrain(model, pretrained_path, test=False):
@@ -50,7 +50,7 @@ def load_pretrain(model, pretrained_path, test=False):
     logger.info('load pretrained model from {}'.format(pretrained_path))
     device = torch.cuda.current_device()
     pretrained_dict = torch.load(pretrained_path,
-        map_location=lambda storage, loc: storage.cuda(device))
+                                 map_location=lambda storage, loc:storage.cuda(device))
 
     # if (cfg.ENHANCE.RPN.deform_conv or cfg.ENHANCE.BACKBONE.cross_attn) and not test:
     #     new_state_dict = model.state_dict()
@@ -60,7 +60,17 @@ def load_pretrain(model, pretrained_path, test=False):
     if not test:
         new_state_dict = model.state_dict()
         # print(new_state_dict.keys())
-        combined_dict = {k:v for k, v in pretrained_dict.items() if k in new_state_dict}
+        if cfg.ENHANCE.FEATURE_FUSE:
+            combined_dict = {}
+            for k, v in pretrained_dict.items():
+                if k in new_state_dict:
+                    if ("rpn_head.cls_weight" == k) or ("rpn_head.loc_weight" == k):
+                        print("fuck")
+                        continue
+                    combined_dict[k] = v
+        else:
+            combined_dict = {k:v for k, v in pretrained_dict.items() if k in new_state_dict}
+
         pretrained_dict = combined_dict
 
     if "state_dict" in pretrained_dict.keys():
@@ -90,7 +100,7 @@ def load_pretrain(model, pretrained_path, test=False):
 def restore_from(model, optimizer, ckpt_path):
     device = torch.cuda.current_device()
     ckpt = torch.load(ckpt_path,
-        map_location=lambda storage, loc: storage.cuda(device))
+                      map_location=lambda storage, loc:storage.cuda(device))
     epoch = ckpt['epoch']
 
     ckpt_model_dict = remove_prefix(ckpt['state_dict'], 'module.')

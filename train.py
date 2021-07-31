@@ -118,10 +118,6 @@ def build_opt_lr(model, current_epoch=0):
         trainable_params += [{'params':model.refine_head.parameters(),
                               'lr'    :cfg.TRAIN.BASE_LR}]
 
-    if cfg.ENHANCE.FEATURE_FUSE:
-        trainable_params += [{'params':model.feature_fuse.parameters(),
-                              'lr'    :cfg.TRAIN.BASE_LR}]
-
     optimizer = torch.optim.SGD(trainable_params,
                                 momentum=cfg.TRAIN.MOMENTUM,
                                 weight_decay=cfg.TRAIN.WEIGHT_DECAY)
@@ -181,7 +177,7 @@ def train(train_loader, model, optimizer, lr_scheduler, tb_writer):
         return not (math.isnan(x) or math.isinf(x) or x > 1e4)
 
     world_size = get_world_size()
-    print(len(train_loader.dataset))
+    # print(len(train_loader.dataset))
     num_per_epoch = len(train_loader.dataset) // \
                     cfg.TRAIN.EPOCH // (cfg.TRAIN.BATCH_SIZE * world_size)
     start_epoch = cfg.TRAIN.START_EPOCH
@@ -239,6 +235,11 @@ def train(train_loader, model, optimizer, lr_scheduler, tb_writer):
         if is_valid_number(loss.data.item()):
             optimizer.zero_grad()
             loss.backward()
+
+            # for name, param in model.named_parameters():
+            #     if not param.grad:
+            #         print(f"detected unused parameter: {name}")
+
             reduce_gradients(model)
 
             if rank == 0 and cfg.TRAIN.LOG_GRADS:

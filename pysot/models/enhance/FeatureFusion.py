@@ -14,7 +14,7 @@ class FeatureFusion(nn.Module):
 
     def upsample_add(self, x, y):
         _, _, H, W = y.size()
-        return F.upsample(x, size=(H, W), mode='bilinear') + y
+        return F.interpolate(x, size=(H, W), mode='bilinear') + y
 
     def downsample_add(self, x, y):
         _, _, H, W = y.size()
