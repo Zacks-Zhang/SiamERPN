@@ -58,7 +58,7 @@ TRACK:
 TRAIN:
     EPOCH: 20
     START_EPOCH: 0
-    BATCH_SIZE: 2
+    BATCH_SIZE: 64
     BASE_LR: 0.005
     CLS_WEIGHT: 1.0
     LOC_WEIGHT: 1.2
@@ -80,7 +80,9 @@ TRAIN:
 DATASET:
     NAMES:
         - 'COCO'
-    
+        - 'VID'
+        - 'YOUTUBEBB'
+        -
     TEMPLATE:
         SHIFT: 4
         SCALE: 0.05
