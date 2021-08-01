@@ -52,19 +52,20 @@ def load_pretrain(model, pretrained_path, test=False):
     pretrained_dict = torch.load(pretrained_path,
                                  map_location=lambda storage, loc:storage.cuda(device))
 
-    new_state_dict = model.state_dict()
-    if cfg.ENHANCE.FEATURE_FUSE:
-        combined_dict = {}
-        for k, v in pretrained_dict.items():
-            if k in new_state_dict:
-                if ("rpn_head.cls_weight" == k) or ("rpn_head.loc_weight" == k):
-                    # print("fuck")
-                    continue
-                combined_dict[k] = v
-    else:
-        combined_dict = {k:v for k, v in pretrained_dict.items() if k in new_state_dict}
+    if not test:
+        new_state_dict = model.state_dict()
+        if cfg.ENHANCE.FEATURE_FUSE:
+            combined_dict = {}
+            for k, v in pretrained_dict.items():
+                if k in new_state_dict:
+                    if ("rpn_head.cls_weight" == k) or ("rpn_head.loc_weight" == k):
+                        # print("fuck")
+                        continue
+                    combined_dict[k] = v
+        else:
+            combined_dict = {k:v for k, v in pretrained_dict.items() if k in new_state_dict}
 
-    pretrained_dict = combined_dict
+        pretrained_dict = combined_dict
 
     if "state_dict" in pretrained_dict.keys():
         pretrained_dict = remove_prefix(pretrained_dict['state_dict'],
