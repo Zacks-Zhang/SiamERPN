@@ -121,7 +121,7 @@ class ResNet(nn.Module):
         self.relu = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         self.layer1 = self._make_layer(block, 64, layers[0])
-        self.layer2 = self._make_layer(block, 128, layers[1], stride=2)
+        self.layer2 = self._make_layer(block, 128, layers[1], stride=2)  # 15x15
 
         self.feature_size = 128 * block.expansion
         self.used_layers = used_layers

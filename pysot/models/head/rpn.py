@@ -159,12 +159,8 @@ class MultiRPN(RPN):
 
         def weighted_avg(lst, weight):
             s = 0
-            if cfg.ENHANCE.FEATURE_FUSE:
-                for i in range(2):
-                    s += lst[i] * weight[i]
-            else:
-                for i in range(len(weight)):
-                    s += lst[i] * weight[i]
+            for i in range(len(weight)):
+                s += lst[i] * weight[i]
             return s
 
         if self.weighted:

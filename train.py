@@ -118,6 +118,11 @@ def build_opt_lr(model, current_epoch=0):
         trainable_params += [{'params':model.refine_head.parameters(),
                               'lr'    :cfg.TRAIN.BASE_LR}]
 
+    if cfg.ENHANCE.FEATURE_FUSE:
+        trainable_params += [{'params':model.feature_fuse.parameters(),
+                              'lr'    :cfg.TRAIN.BASE_LR}]
+
+
     optimizer = torch.optim.SGD(trainable_params,
                                 momentum=cfg.TRAIN.MOMENTUM,
                                 weight_decay=cfg.TRAIN.WEIGHT_DECAY)
@@ -309,7 +314,7 @@ def main( ):
         cur_path = os.path.dirname(os.path.realpath(__file__))
         backbone_path = os.path.join(cur_path, cfg.BACKBONE.PRETRAINED)
         # load_pretrain(model.backbone, backbone_path)
-        load_pretrain(model, backbone_path)
+        load_pretrain(model.backbone, backbone_path)
 
     # create tensorboard writer
     if rank == 0 and cfg.TRAIN.LOG_DIR:

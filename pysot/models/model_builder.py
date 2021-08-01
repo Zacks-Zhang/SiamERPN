@@ -95,17 +95,14 @@ class ModelBuilder(nn.Module):
         zf = self.backbone(template)
         xf = self.backbone(search)
 
-        if cfg.MASK.MASK:
-            zf = zf[-1]
-            self.xf_refine = xf[:-1]
-            xf = xf[-1]
+        if cfg.ENHANCE.FEATURE_FUSE:
+            zf = self.feature_fuse(zf)
+            xf = self.feature_fuse(xf)
+
         if cfg.ADJUST.ADJUST:
             zf = self.neck(zf)
             xf = self.neck(xf)
 
-        if cfg.ENHANCE.FEATURE_FUSE:
-            zf = self.feature_fuse(zf)
-            xf = self.feature_fuse(xf)
 
         # 加入了CBAM作为自注意力
         cls, loc = self.rpn_head(zf, xf)

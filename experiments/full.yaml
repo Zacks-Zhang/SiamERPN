@@ -4,7 +4,7 @@ BACKBONE:
     TYPE: "resnet50"
     KWARGS:
         used_layers: [2, 3, 4]
-    PRETRAINED: 'pretrained_models/model.pth'
+    PRETRAINED: 'pretrained_models/resnet50.model'
     TRAIN_LAYERS: ['layer2', 'layer3', 'layer4']
     TRAIN_EPOCH: 5
     LAYERS_LR: 0.1
@@ -24,8 +24,10 @@ ADJUST:
     ADJUST: true
     TYPE: "AdjustAllLayer"
     KWARGS:
-        in_channels: [512, 1024, 2048]
-        out_channels: [256, 256, 256]
+#        in_channels: [512, 1024, 2048]
+#        out_channels: [256, 256, 256]
+        in_channels: [ 256, 256 ]
+        out_channels: [ 256, 256 ]
 
 RPN:
     TYPE: 'MultiRPN'
@@ -56,7 +58,7 @@ TRACK:
 TRAIN:
     EPOCH: 20
     START_EPOCH: 0
-    BATCH_SIZE: 64
+    BATCH_SIZE: 2
     BASE_LR: 0.005
     CLS_WEIGHT: 1.0
     LOC_WEIGHT: 1.2
@@ -78,8 +80,6 @@ TRAIN:
 DATASET:
     NAMES:
         - 'COCO'
-        - 'VID'
-        - 'YOUTUBEBB'
     
     TEMPLATE:
         SHIFT: 4

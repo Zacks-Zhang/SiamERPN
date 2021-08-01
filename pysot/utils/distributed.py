@@ -136,9 +136,12 @@ def reduce_gradients(model, _type='sum'):
         #         if param.grad == None:
         #             print(f"detected unused parameter: {name}")
 
-        for param in model.parameters():
+        for name, param in model.named_parameters():
             if param.requires_grad:
-                dist.all_reduce(param.grad.data)
+                try:
+                    dist.all_reduce(param.grad.data)
+                except:
+                    print(name)
                 if _type == 'avg':
                     param.grad.data /= get_world_size()
     else:
