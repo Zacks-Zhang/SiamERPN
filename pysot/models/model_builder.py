@@ -43,25 +43,19 @@ class ModelBuilder(nn.Module):
 
     def template(self, z):
         zf = self.backbone(z)
-        if cfg.MASK.MASK:
-            zf = zf[-1]
-        if cfg.ADJUST.ADJUST:
-            zf = self.neck(zf)
         if cfg.ENHANCE.FEATURE_FUSE:
             zf = self.feature_fuse(zf)
+        if cfg.ADJUST.ADJUST:
+            zf = self.neck(zf)
         self.zf = zf
 
     def track(self, x):
         xf = self.backbone(x)
-        if cfg.MASK.MASK:
-            self.xf = xf[:-1]
-            xf = xf[-1]
-        if cfg.ADJUST.ADJUST:
-            xf = self.neck(xf)
-
         if cfg.ENHANCE.FEATURE_FUSE:
             xf = self.feature_fuse(xf)
 
+        if cfg.ADJUST.ADJUST:
+            xf = self.neck(xf)
         cls, loc = self.rpn_head(self.zf, xf)
         if cfg.MASK.MASK:
             mask, self.mask_corr_feature = self.mask_head(self.zf, xf)
