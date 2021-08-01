@@ -17,7 +17,7 @@ ENHANCE:
     BACKBONE:
         enhanced_layers: ['layer_enhancer_3_4', 'layer_enhancer_4_5', 'layer_enhancer_5']
         triple_attn: False
-    FEATURE_FUSE: True
+    FEATURE_FUSE: False
 
 
 ADJUST:
@@ -31,7 +31,7 @@ RPN:
     TYPE: 'MultiRPN'
     KWARGS:
         anchor_num: 5
-        in_channels: [256, 256]
+        in_channels: [256, 256, 256]
         weighted: True
 
 MASK:
