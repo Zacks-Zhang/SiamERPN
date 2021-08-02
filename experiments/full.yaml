@@ -25,8 +25,8 @@ ADJUST:
     TYPE: "AdjustAllLayer"
     KWARGS:
 #        in_channels: [512, 1024, 2048]
-        in_channels: [256, 256, 256]
-        out_channels: [256, 256, 256]
+         in_channels: [256, 256, 256]
+         out_channels: [256, 256, 256]
 #        in_channels: [ 256, 256 ]
 #        out_channels: [ 256, 256 ]
 
