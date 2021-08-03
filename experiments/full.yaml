@@ -34,7 +34,8 @@ RPN:
     TYPE: 'MultiRPN'
     KWARGS:
         anchor_num: 5
-        in_channels: [256, 256, 256]
+#        in_channels: [256, 256, 256]
+        in_channels: [ 256, 256 ]
         weighted: True
 
 MASK:
