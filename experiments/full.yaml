@@ -25,10 +25,10 @@ ADJUST:
     TYPE: "AdjustAllLayer"
     KWARGS:
 #        in_channels: [512, 1024, 2048]
-         in_channels: [256, 256, 256]
-         out_channels: [256, 256, 256]
-#        in_channels: [ 256, 256 ]
-#        out_channels: [ 256, 256 ]
+#         in_channels: [256, 256, 256]
+#         out_channels: [256, 256, 256]
+        in_channels: [ 256, 256 ]
+        out_channels: [ 256, 256 ]
 
 RPN:
     TYPE: 'MultiRPN'
@@ -56,7 +56,7 @@ TRACK:
     BASE_SIZE: 8
     CONTEXT_AMOUNT: 0.5
 
-TRAIN:
+TRAIN:y
     EPOCH: 30
     START_EPOCH: 0
     BATCH_SIZE: 64

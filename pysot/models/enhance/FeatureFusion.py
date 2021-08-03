@@ -23,7 +23,7 @@ class FeatureFusion(nn.Module):
         # out.append(self.upsample_add(x[3], x[2]))
         out[1] = self.upsample_add(out[2], out[1])
         out[0] = self.upsample_add(out[1], out[0])
-        # out.pop(-1)
+        out.pop(-1)
         return out
 
     def upsample_add(self, x, y):
